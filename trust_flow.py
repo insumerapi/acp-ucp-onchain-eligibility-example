@@ -81,6 +81,9 @@ for dim_name, dim_data in trust["dimensions"].items():
     print(f"\n  {dim_name.upper()} ({status}): {passed}/{total} passed")
 
     for check in dim_data["checks"][:3]:  # show first 3
+        if check.get("evaluated") is False:
+            print(f"    [NOT EVALUATED (requires {check.get('requires')})] {check['label']} (chain {check['chainId']})")
+            continue
         icon = "PASS" if check["met"] else "FAIL"
         print(f"    [{icon}] {check['label']} (chain {check['chainId']})")
 
