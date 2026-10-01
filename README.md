@@ -80,19 +80,23 @@ python merchant_onboarding.py
 
 ### Trust Profile Dimensions (`trust_flow.py`)
 
-The base profile is 45 checks across 26 chains in 5 dimensions. Optional non-EVM wallets add up to 5 more checks in 4 more dimensions: up to 50 checks across 28 chains in 9 dimensions.
+The base profile is 145 checks across 27 chains in 9 dimensions. Optional non-EVM wallets add up to 21 more checks in 4 more dimensions: up to 166 checks across 29 chains in 13 dimensions. Every check is a presence check. The signed `conditionSetVersion` (currently `2026-10`) names the check list run; log it, never reject on it.
 
 | Dimension | Checks | What It Covers |
 |-----------|--------|---------------|
-| Stablecoins | 27 | USDC and USDT across 22 EVM chains |
-| Governance | 4 | UNI, AAVE, ARB, OP |
+| Stablecoins | 52 | USDC, USDT, OUSD, PYUSD, USDG, USD1, RLUSD, USDS, DAI and EURC across 23 EVM chains |
+| Governance | 8 | UNI, AAVE, ARB, OP, ENS, LDO, SKY, COMP |
 | NFTs | 3 | BAYC, Pudgy Penguins, Wrapped CryptoPunks |
-| Staking | 3 | stETH, rETH, cbETH |
+| Staking | 5 | stETH, rETH, cbETH, wstETH, weETH |
 | Institutional stablecoins | 8 | EURCV, USDCV, USDC and BENJI across Ethereum, Solana, XRPL, Stellar and Sui (the non-EVM entries are evaluated when that wallet is supplied) |
-| Solana | 1 | USDC on Solana (optional, requires `solanaWallet`) |
-| XRPL | 2 | RLUSD + USDC on XRPL (optional, requires `xrplWallet`) |
+| Tokenized treasuries | 16 | BUIDL, USYC, OUSG, USTB, USDY (USDY on Sui is evaluated when `suiWallet` is supplied) |
+| Stablecoin deposits | 39 | Aave v3 aUSDC/aUSDT, sUSDS, sDAI, listed Morpho USDC vaults |
+| Wrapped bitcoin | 12 | cbBTC, WBTC, tBTC |
+| Names | 2 | ENS .eth names, Basenames |
+| Solana | 14 | USDC, EURC, OUSD, PYUSD, USD1, USDG, USDS, BUIDL, USDY, WBTC, cbBTC, tBTC, JitoSOL, mSOL on Solana (optional, requires `solanaWallet`) |
+| XRPL | 3 | RLUSD, USDC, OUSG on XRPL (optional, requires `xrplWallet`) |
 | Bitcoin | 1 | Native BTC (optional, requires `bitcoinWallet`) |
-| Tron | 1 | USDT on Tron (optional, requires `tronWallet`) |
+| Tron | 3 | USDT, USD1, WBTC on Tron (optional, requires `tronWallet`) |
 
 ### Merchant Onboarding (`merchant_onboarding.py`)
 

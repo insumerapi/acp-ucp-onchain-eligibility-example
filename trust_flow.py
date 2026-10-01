@@ -2,14 +2,19 @@
 Wallet Trust Profiles — Agent-to-Agent Trust Signals
 
 Generate ECDSA-signed trust fact profiles for any EVM wallet.
-45 base checks across 26 chains in 5 dimensions (up to 50 checks across 28 chains
-in 9 dimensions with optional non-EVM wallets):
-  - Stablecoins (27): USDC and USDT across 22 EVM chains
-  - Governance (4): UNI, AAVE, ARB, OP
+145 base checks across 27 chains in 9 dimensions (up to 166 checks across 29 chains
+in 13 dimensions with optional non-EVM wallets). Every check is a presence check:
+  - Stablecoins (52): USDC, USDT, OUSD, PYUSD, USDG, USD1, RLUSD, USDS, DAI, EURC across 23 EVM chains
+  - Governance (8): UNI, AAVE, ARB, OP, ENS, LDO, SKY, COMP
   - NFTs (3): BAYC, Pudgy Penguins, Wrapped CryptoPunks
-  - Staking (3): stETH, rETH, cbETH
+  - Staking (5): stETH, rETH, cbETH, wstETH, weETH
   - Institutional stablecoins (8): EURCV, USDCV, USDC and BENJI
-  - Optional: Solana (1), XRPL (2), Bitcoin (1), Tron (1)
+  - Tokenized treasuries (16): BUIDL, USYC, OUSG, USTB, USDY
+  - Stablecoin deposits (39): Aave v3 aUSDC/aUSDT, sUSDS, sDAI, Morpho USDC vaults
+  - Wrapped bitcoin (12): cbBTC, WBTC, tBTC
+  - Names (2): ENS .eth, Basenames
+  - Optional: Solana (14), XRPL (3), Bitcoin (1), Tron (3)
+conditionSetVersion (currently "2026-10") is signed and names the check list run.
 
 Single wallet (3 credits) or batch up to 10 wallets (3 credits/wallet).
 Batch mode shares block fetches for 5-8x faster throughput.
