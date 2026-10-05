@@ -176,6 +176,8 @@ if resp.status_code == 503 and result.get("error", {}).get("code") == "rpc_failu
     # Wait 2-5s and retry
 ```
 
+The same 503 can come back from the free discount check (`GET /v1/discount/check`) and from the discount endpoints (`POST /v1/verify`, `POST /v1/acp/discount`, `POST /v1/ucp/discount`). There it means the same thing: a read did not complete, so nothing is concluded about the wallet. No discount code is issued and no merchant credit is charged. Do not report the wallet as not eligible. Retry instead. `full_agent_flow.py` handles it by name on the discount check as well as on the ACP call.
+
 ## Cryptographic verification
 
 Every attestation and trust profile is ECDSA P-256 signed. Verify independently:

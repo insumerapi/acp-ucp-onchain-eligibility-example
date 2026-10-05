@@ -66,6 +66,13 @@ if eligibility["ok"]:
     else:
         print("Wallet does not qualify for this merchant.")
         print("(Try a different merchant or wallet)")
+elif eligibility.get("error", {}).get("code") == "rpc_failure":
+    # rpc_failure (503) = a read did not complete. Nothing is concluded about
+    # the wallet: this is not "not eligible". Retryable after 2-5s.
+    print("rpc_failure: data source temporarily unavailable. Retry after 2-5s.")
+    for fc in eligibility["error"].get("failedConditions", []):
+        print(f"  chain {fc.get('chainId', '?')}: {fc['message']}")
+    sys.exit(1)
 else:
     print(f"Error: {eligibility['error']['message']}")
 
