@@ -1,9 +1,9 @@
 """
 Wallet Trust Profiles — Agent-to-Agent Trust Signals
 
-Generate ECDSA-signed trust fact profiles for any EVM wallet.
-145 base checks across 27 chains in 9 dimensions (up to 166 checks across 29 chains
-in 13 dimensions with optional non-EVM wallets). Every check is a presence check:
+Generate signed trust fact profiles for any EVM wallet (ES256 plus a post-quantum ML-DSA-65 signature).
+155 base checks across 27 chains in 10 dimensions (up to 176 checks across 29 chains
+in 14 dimensions with optional non-EVM wallets). Every check is a presence check:
   - Stablecoins (52): USDC, USDT, OUSD, PYUSD, USDG, USD1, RLUSD, USDS, DAI, EURC across 23 EVM chains
   - Governance (8): UNI, AAVE, ARB, OP, ENS, LDO, SKY, COMP
   - NFTs (3): BAYC, Pudgy Penguins, Wrapped CryptoPunks
@@ -13,11 +13,14 @@ in 13 dimensions with optional non-EVM wallets). Every check is a presence check
   - Stablecoin deposits (39): Aave v3 aUSDC/aUSDT, sUSDS, sDAI, Morpho USDC vaults
   - Wrapped bitcoin (12): cbBTC, WBTC, tBTC
   - Names (2): ENS .eth, Basenames
+  - Account (10): contract code and EIP-7702 delegation on Ethereum, Base, Arbitrum,
+    Optimism and Polygon
   - Optional: Solana (14), XRPL (3), Bitcoin (1), Tron (3)
-conditionSetVersion (currently "2026-10") is signed and names the check list run.
+Dimensions come back in this order. conditionSetVersion (currently "2026-10-08")
+is signed and names the check list run.
 
 Single wallet (3 credits) or batch up to 10 wallets (3 credits/wallet).
-Batch mode shares block fetches for 5-8x faster throughput.
+Batch mode is faster than sequential calls.
 
 Usage:
     export INSUMER_API_KEY="insr_live_YOUR_KEY_HERE"

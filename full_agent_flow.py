@@ -7,8 +7,13 @@ Complete flow an AI agent follows:
   3. Request a signed discount code (ACP or UCP)
   4. Validate the code at merchant checkout
 
+Step 3 issues a real code. A code that carries a discount costs 1 credit
+from the API key that owns the store, so the flow runs against a store
+your key owns (create one with merchant_onboarding.py).
+
 Usage:
     export INSUMER_API_KEY="insr_live_YOUR_KEY_HERE"
+    export INSUMER_MERCHANT_ID="your-merchant-id"
     python full_agent_flow.py
 """
 
@@ -25,6 +30,12 @@ if not API_KEY:
     print("Get a free key: https://insumermodel.com/developers/#pricing")
     sys.exit(1)
 
+MERCHANT_ID = os.environ.get("INSUMER_MERCHANT_ID", "")
+if not MERCHANT_ID:
+    print("Set INSUMER_MERCHANT_ID to a store your API key owns")
+    print("(create one with merchant_onboarding.py).")
+    sys.exit(1)
+
 
 # ── Step 1: Discover merchants ──────────────────────────────────
 
@@ -36,16 +47,15 @@ merchants = requests.get(
     params={"verified": "true", "limit": 5},
 ).json()
 
-if not merchants["ok"] or not merchants["data"]:
-    print("No merchants found.")
-    sys.exit(1)
+if merchants["ok"]:
+    for m in merchants["data"]:
+        tokens = [t["symbol"] for t in m.get("tokens", [])]
+        print(f"  {m['companyName']} ({m['id']}), tokens: {', '.join(tokens) or 'none'}")
+    if not merchants["data"]:
+        print("  No verified merchants listed.")
 
-for m in merchants["data"]:
-    tokens = [t["symbol"] for t in m.get("tokens", [])]
-    print(f"  {m['companyName']} ({m['id']}) — tokens: {', '.join(tokens) or 'none'}")
-
-merchant_id = merchants["data"][0]["id"]
-print(f"\nUsing merchant: {merchant_id}")
+merchant_id = MERCHANT_ID
+print(f"\nUsing merchant: {merchant_id} (your store)")
 
 
 # ── Step 2: Check eligibility (free) ────────────────────────────

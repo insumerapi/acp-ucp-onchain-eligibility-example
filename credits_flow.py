@@ -6,7 +6,11 @@ Agents can autonomously manage their API credits:
   - Buy verification credits with USDC, USDT or BTC (minimum $5).
     Volume rates: $5-99 = 25 credits per $1, $100-499 = 33 per $1,
     $500+ = 50 per $1
-  - Buy merchant credits for discount code generation (25 per $1, flat)
+
+One credit balance: the same credits pay for discount codes at any store
+your key owns. A code that carries a discount costs 1 credit from the key
+that owns the store (a 0% result is free); a caller using another key is
+not charged. A store has no balance of its own.
 
 Accepted payments (the token is detected from the transaction):
   USDC or USDT on Ethereum (1), Base (8453), Polygon (137), Arbitrum (42161),
@@ -50,7 +54,7 @@ if result["ok"]:
     data = result["data"]
     print(f"  Credits:     {data['apiKeyCredits']}")
     print(f"  Tier:        {data['tier']}")
-    print(f"  Daily limit: {data['dailyLimit']} reads/day")
+    print(f"  Daily limit: {data['dailyLimit']} requests/day")
 
     # Pricing reference
     print("\n  Pricing:")
@@ -58,6 +62,7 @@ if result["ok"]:
     print("    Attestation+proof: 2 credits ($0.08)")
     print("    Trust profile:     3 credits ($0.12)")
     print("    Trust+proof:       6 credits ($0.24)")
+    print("    Discount code:     1 credit from the store owner's key (0% result free)")
 else:
     print(f"  Error: {result['error']['message']}")
     sys.exit(1)
@@ -105,20 +110,23 @@ print("\n  Rates: $5-99 = 25 credits per $1 | $100-499 = 33 per $1 | $500+ = 50 
 print("  Minimum: $5 (125 credits). BTC is credited at the transfer's USD value.")
 
 
-# ── Step 3: Buy merchant credits ─────────────────────────────────
+# ── Step 3: Top up through a store you own (compatibility) ──────
 
-print("\n\n=== Step 3: Buy Merchant Credits (USDC, USDT or BTC) ===\n")
-print("Merchant credits are consumed by /v1/verify, /v1/acp/discount, /v1/ucp/discount.\n")
+print("\n\n=== Step 3: Store Top-Up Endpoint (Compatibility) ===\n")
+print("A store has no credit balance of its own. Its discount codes (/v1/verify,")
+print("/v1/acp/discount, /v1/ucp/discount) are paid from the API key that owns it,")
+print("the same balance POST /v1/credits/buy tops up.\n")
 
-MERCHANT_ID = "demo-coffee-shop"
+MERCHANT_ID = "your-merchant-id"
 
-print(f"  Example API call:")
+print(f"  Example API call (kept for compatibility; owner key only):")
 print(f"  POST {BASE_URL}/v1/merchants/{MERCHANT_ID}/credits")
 print(f"  Body: {{")
 print(f'    "txHash": "0x...",')
 print(f'    "chainId": 8453,')
-print(f'    "amount": 10        // 10 USDC or USDT = 250 merchant credits (flat 25 per $1)')
+print(f'    "amount": 10        // 10 USDC or USDT = 250 credits on the owner key (flat 25 per $1)')
 print(f"  }}")
+print("\n  Use POST /v1/credits/buy instead: same balance, with the volume rates.")
 
 
 # ── Autonomous agent flow ────────────────────────────────────────
@@ -129,5 +137,5 @@ print("  1. GET  /v1/credits           — check remaining credits")
 print("  2. If low, send USDC, USDT or BTC on-chain — agent initiates transfer")
 print("  3. POST /v1/credits/buy       — submit tx hash, receive credits")
 print("  4. Continue making API calls   — attestations, trust profiles, discounts")
-print("\nSame pattern works for merchant credits via POST /v1/merchants/{id}/credits")
+print("\nThe same balance pays for discount codes at the stores your key owns.")
 print("\nThis enables fully autonomous agent commerce with no human billing cycle.")

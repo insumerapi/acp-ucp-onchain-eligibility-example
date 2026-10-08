@@ -20,7 +20,7 @@ Minimal, copy-paste-ready examples for integrating on-chain verification into AI
 
 | File | Description |
 |------|-------------|
-| `attest_flow.py` | Boolean attestation — 4 of the 9 condition types + Merkle storage proofs |
+| `attest_flow.py` | Boolean attestation: 4 of the 10 condition types, plus Merkle storage proofs |
 | `trust_flow.py` | Wallet trust profiles — single + batch (up to 10 wallets) |
 | `compliance_gating.py` | EAS attestation templates — Coinbase KYC, Gitcoin Passport, Farcaster ID |
 
@@ -50,6 +50,10 @@ pip install requests
 # Set your API key
 export INSUMER_API_KEY="insr_live_YOUR_KEY_HERE"
 
+# For acp_flow.py, ucp_flow.py and full_agent_flow.py: a store your key owns
+# (create one with merchant_onboarding.py)
+export INSUMER_MERCHANT_ID="your-merchant-id"
+
 # Run any example
 python acp_flow.py
 python attest_flow.py
@@ -64,9 +68,11 @@ python merchant_onboarding.py
 | Type | What It Checks | Chains |
 |------|---------------|--------|
 | `token_balance` | Token or native coin balance >= threshold | All 37 (31 EVM + Solana, XRPL, Bitcoin, Tron, Stellar, Sui) |
-| `nft_ownership` | Holds >= 1 NFT from collection | 33 (31 EVM + Solana + XRPL) |
+| `nft_ownership` | Holds >= 1 NFT from collection (ERC-721 style on EVM chains) | 33 (31 EVM + Solana + XRPL) |
 | `eas_attestation` | On-chain identity credential via EAS | Ethereum, Optimism, Polygon, Base, Arbitrum |
 | `farcaster_id` | Farcaster IdRegistry presence | Optimism |
+
+The other six condition types (`evm_view_call`, `ratio_to_amount`, `ratio_to_supply`, `erc8004_agent`, `erc7710_delegation`, `account_code`) are documented in the [OpenAPI spec](https://insumermodel.com/openapi.yaml).
 
 ### 5 Compliance Templates (`compliance_gating.py`)
 
@@ -80,7 +86,7 @@ python merchant_onboarding.py
 
 ### Trust Profile Dimensions (`trust_flow.py`)
 
-The base profile is 145 checks across 27 chains in 9 dimensions. Optional non-EVM wallets add up to 21 more checks in 4 more dimensions: up to 166 checks across 29 chains in 13 dimensions. Every check is a presence check. The signed `conditionSetVersion` (currently `2026-10`) names the check list run; log it, never reject on it.
+The base profile is 155 checks across 27 chains in 10 dimensions. Optional non-EVM wallets add up to 21 more checks in 4 more dimensions: up to 176 checks across 29 chains in 14 dimensions. Every check is a presence check. Dimensions come back in the order of this table. The signed `conditionSetVersion` (currently `2026-10-08`) names the check list run; log it, never reject on it.
 
 | Dimension | Checks | What It Covers |
 |-----------|--------|---------------|
@@ -93,6 +99,7 @@ The base profile is 145 checks across 27 chains in 9 dimensions. Optional non-EV
 | Stablecoin deposits | 39 | Aave v3 aUSDC/aUSDT, sUSDS, sDAI, listed Morpho USDC vaults |
 | Wrapped bitcoin | 12 | cbBTC, WBTC, tBTC |
 | Names | 2 | ENS .eth names, Basenames |
+| Account | 10 | Contract code and EIP-7702 delegation at the wallet address on Ethereum, Base, Arbitrum, Optimism and Polygon |
 | Solana | 14 | USDC, EURC, OUSD, PYUSD, USD1, USDG, USDS, BUIDL, USDY, WBTC, cbBTC, tBTC, JitoSOL, mSOL on Solana (optional, requires `solanaWallet`) |
 | XRPL | 3 | RLUSD, USDC, OUSG on XRPL (optional, requires `xrplWallet`) |
 | Bitcoin | 1 | Native BTC (optional, requires `bitcoinWallet`) |
@@ -103,7 +110,7 @@ The base profile is 145 checks across 27 chains in 9 dimensions. Optional non-EV
 ```
 Agent                         InsumerAPI
   │                               │
-  ├─ POST /v1/merchants ─────────►│  Create merchant (100 free credits)
+  ├─ POST /v1/merchants ─────────►│  Create merchant (owned by your key)
   ├─ PUT  /v1/merchants/{id}/tokens ►│  Configure token tiers (up to 8 × 4)
   ├─ PUT  /v1/merchants/{id}/nfts ──►│  Configure NFT collections (up to 4)
   ├─ PUT  /v1/merchants/{id}/settings►│  Set discount mode + USDC payments
@@ -146,8 +153,8 @@ Agent                    InsumerAPI                  Blockchain
 | `GET /v1/compliance/templates` | Public | Free | `compliance_gating.py` |
 | `GET /v1/credits` | API key | Free | `credits_flow.py` |
 | `POST /v1/credits/buy` | API key | — | `credits_flow.py` |
-| `POST /v1/acp/discount` | API key | 1 merchant | `acp_flow.py` |
-| `POST /v1/ucp/discount` | API key | 1 merchant | `ucp_flow.py` |
+| `POST /v1/acp/discount` | API key | 1 from the store owner's key (0% free) | `acp_flow.py` |
+| `POST /v1/ucp/discount` | API key | 1 from the store owner's key (0% free) | `ucp_flow.py` |
 | `GET /v1/codes/{code}` | Public | Free | `validate_code.py` |
 | `GET /v1/merchants` | None | Free | `full_agent_flow.py` |
 | `GET /v1/merchants/{id}` | None | Free | `full_agent_flow.py` |
@@ -158,7 +165,7 @@ Agent                    InsumerAPI                  Blockchain
 | `PUT /v1/merchants/{id}/settings` | API key | — | `merchant_onboarding.py` |
 | `POST /v1/merchants/{id}/directory` | API key | — | `merchant_onboarding.py` |
 | `GET /v1/merchants/{id}/status` | API key | — | `merchant_onboarding.py` |
-| `POST /v1/merchants/{id}/credits` | API key | — | `credits_flow.py` |
+| `POST /v1/merchants/{id}/credits` | API key | Adds credits to the owner key (compatibility) | `credits_flow.py` |
 
 ## Handling `rpc_failure` Errors
 
@@ -176,20 +183,20 @@ if resp.status_code == 503 and result.get("error", {}).get("code") == "rpc_failu
     # Wait 2-5s and retry
 ```
 
-The same 503 can come back from the free discount check (`GET /v1/discount/check`) and from the discount endpoints (`POST /v1/verify`, `POST /v1/acp/discount`, `POST /v1/ucp/discount`). There it means the same thing: a read did not complete, so nothing is concluded about the wallet. No discount code is issued and no merchant credit is charged. Do not report the wallet as not eligible. Retry instead. `full_agent_flow.py` handles it by name on the discount check as well as on the ACP call.
+The same 503 can come back from the free discount check (`GET /v1/discount/check`) and from the discount endpoints (`POST /v1/verify`, `POST /v1/acp/discount`, `POST /v1/ucp/discount`). There it means the same thing: a read did not complete, so nothing is concluded about the wallet. No discount code is issued and no credit is charged. Do not report the wallet as not eligible. Retry instead. `full_agent_flow.py` handles it by name on the discount check as well as on the ACP call.
 
 ## Cryptographic verification
 
-Every attestation and trust profile is ECDSA P-256 signed. Verify independently:
+Every attestation and trust profile is signed twice: ES256 (ECDSA P-256) and a post-quantum ML-DSA-65 signature (`pqSig`/`pqKid`, and `pqJwt` beside `jwt`). Verify both independently:
 
 ```bash
-npm install insumer-verify
+npm install insumer-verify @noble/post-quantum
 ```
 
 ```javascript
 import { verifyAttestation } from "insumer-verify";
 
-// Pass the full API response envelope {ok, data: {attestation, sig, kid}, meta}
+// Pass the full API response envelope {ok, data: {attestation, sig, kid, pqSig, pqKid}, meta}
 // Do NOT pass response.data — the function expects the outer envelope
 const response = await res.json();
 const result = await verifyAttestation(response, {

@@ -5,8 +5,15 @@ Verifies on-chain token holdings and returns the discount in UCP format
 with title strings, the dev.ucp.shopping.discount extension, and
 per-item allocations.
 
+A code that carries a discount costs 1 credit from the API key that owns
+the store; a 0% result is free, and a caller using another key is not charged.
+
+Set INSUMER_MERCHANT_ID to a store your API key owns (create one with
+merchant_onboarding.py), so the codes it issues are charged to your key.
+
 Usage:
     export INSUMER_API_KEY="insr_live_YOUR_KEY_HERE"
+    export INSUMER_MERCHANT_ID="your-merchant-id"
     python ucp_flow.py
 """
 
@@ -21,6 +28,13 @@ if not API_KEY:
     print("Set INSUMER_API_KEY environment variable first.")
     print("Get a free key: https://insumermodel.com/developers/#pricing")
     sys.exit(1)
+
+MERCHANT_ID = os.environ.get("INSUMER_MERCHANT_ID", "")
+if not MERCHANT_ID:
+    print("Set INSUMER_MERCHANT_ID to a store your API key owns")
+    print("(create one with merchant_onboarding.py).")
+    sys.exit(1)
+print(f"Merchant: {MERCHANT_ID}\n")
 
 
 def ucp_discount(
@@ -58,10 +72,10 @@ def ucp_discount(
 print("=== UCP Discount ===\n")
 
 # For XRPL wallets, pass xrpl_wallet instead of wallet:
-#   ucp_discount(merchant_id="demo-coffee-shop", xrpl_wallet="rG1QQv2nh2gr7RCZ1P8YYcBUKCCN633jCn")
+#   ucp_discount(merchant_id=MERCHANT_ID, xrpl_wallet="rG1QQv2nh2gr7RCZ1P8YYcBUKCCN633jCn")
 
 result = ucp_discount(
-    merchant_id="demo-coffee-shop",
+    merchant_id=MERCHANT_ID,
     wallet="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
     items=[
         {"path": "cart/espresso", "amount": 450},

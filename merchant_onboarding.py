@@ -2,7 +2,7 @@
 Autonomous Merchant Onboarding — Full Self-Serve Pipeline
 
 An AI agent can onboard a merchant end-to-end with zero human intervention:
-  1. Create merchant (receives 100 free credits)
+  1. Create merchant (owned by your API key, which pays for its discount codes)
   2. Configure token discount tiers (up to 8 tokens, 4 tiers each)
   3. Configure NFT collections (up to 4)
   4. Set discount mode and USDC payment settings
@@ -61,7 +61,7 @@ result = requests.post(
 if result["ok"]:
     print(f"  Created: {result['data']['companyName']}")
     print(f"  ID:      {result['data']['id']}")
-    print(f"  Credits: {result['data']['credits']} (free on creation)")
+    print(f"  Credits: {result['data']['credits']} (your key's balance; the store has none of its own)")
 elif result["error"]["code"] == 409:
     print(f"  Merchant '{MERCHANT_ID}' already exists (continuing with config)")
 else:
@@ -230,7 +230,7 @@ if result["ok"]:
     data = result["data"]
     print(f"  Name:           {data['companyName']}")
     print(f"  ID:             {data['id']}")
-    print(f"  Credits:        {data['credits']}")
+    print(f"  Owner credits:  {data['credits']}")
     print(f"  Discount mode:  {data['discountMode']}")
     print(f"  Discount cap:   {data.get('discountCap', 'none')}%")
     print(f"  In directory:   {data['listedInDirectory']}")

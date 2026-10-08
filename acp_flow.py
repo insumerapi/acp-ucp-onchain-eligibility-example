@@ -10,8 +10,15 @@ they echo discount codes the caller submitted, and it accepts none.
 An applied entry needs a monetary base, so pass items[] or subtotal
 (minor units); without either, applied is empty even for an eligible wallet.
 
+A code that carries a discount costs 1 credit from the API key that owns
+the store; a 0% result is free, and a caller using another key is not charged.
+
+Set INSUMER_MERCHANT_ID to a store your API key owns (create one with
+merchant_onboarding.py), so the codes it issues are charged to your key.
+
 Usage:
     export INSUMER_API_KEY="insr_live_YOUR_KEY_HERE"
+    export INSUMER_MERCHANT_ID="your-merchant-id"
     python acp_flow.py
 """
 
@@ -26,6 +33,13 @@ if not API_KEY:
     print("Set INSUMER_API_KEY environment variable first.")
     print("Get a free key: https://insumermodel.com/developers/#pricing")
     sys.exit(1)
+
+MERCHANT_ID = os.environ.get("INSUMER_MERCHANT_ID", "")
+if not MERCHANT_ID:
+    print("Set INSUMER_MERCHANT_ID to a store your API key owns")
+    print("(create one with merchant_onboarding.py).")
+    sys.exit(1)
+print(f"Merchant: {MERCHANT_ID}\n")
 
 
 def acp_discount(
@@ -66,10 +80,10 @@ def acp_discount(
 print("=== Basic ACP Discount ===\n")
 
 # For XRPL wallets, pass xrpl_wallet instead of wallet:
-#   acp_discount(merchant_id="demo-coffee-shop", xrpl_wallet="rG1QQv2nh2gr7RCZ1P8YYcBUKCCN633jCn")
+#   acp_discount(merchant_id=MERCHANT_ID, xrpl_wallet="rG1QQv2nh2gr7RCZ1P8YYcBUKCCN633jCn")
 
 result = acp_discount(
-    merchant_id="demo-coffee-shop",
+    merchant_id=MERCHANT_ID,
     wallet="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
     subtotal=5000,  # $50.00 order, in cents
 )
@@ -103,7 +117,7 @@ print(f"Credits left: {result['meta']['creditsRemaining']}")
 print("\n\n=== ACP with Per-Item Allocations ===\n")
 
 result = acp_discount(
-    merchant_id="demo-coffee-shop",
+    merchant_id=MERCHANT_ID,
     wallet="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
     items=[
         {"path": "cart/espresso", "amount": 450},
@@ -120,3 +134,7 @@ if result["ok"] and result["data"]["discounts"]["applied"]:
         print("Per-item breakdown:")
         for alloc in entry["allocations"]:
             print(f"  {alloc['path']}: -${alloc['amount'] / 100:.2f}")
+elif result["ok"]:
+    print("Not eligible: this wallet holds nothing the merchant discounts.")
+else:
+    print(f"Error: {result['error']['message']}")
