@@ -50,9 +50,9 @@ pip install requests
 # Set your API key
 export INSUMER_API_KEY="insr_live_YOUR_KEY_HERE"
 
-# For acp_flow.py, ucp_flow.py and full_agent_flow.py: a store your key owns
-# (create one with merchant_onboarding.py)
-export INSUMER_MERCHANT_ID="your-merchant-id"
+# Optional: acp_flow.py, ucp_flow.py and full_agent_flow.py run against
+# demo-coffee-shop, InsumerAPI's demo store, unless you name your own
+# export INSUMER_MERCHANT_ID="your-merchant-id"
 
 # Run any example
 python acp_flow.py

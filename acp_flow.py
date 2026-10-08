@@ -13,12 +13,13 @@ An applied entry needs a monetary base, so pass items[] or subtotal
 A code that carries a discount costs 1 credit from the API key that owns
 the store; a 0% result is free, and a caller using another key is not charged.
 
-Set INSUMER_MERCHANT_ID to a store your API key owns (create one with
-merchant_onboarding.py), so the codes it issues are charged to your key.
+By default the example runs against demo-coffee-shop, InsumerAPI's demo
+store, which pays for its own codes. Set INSUMER_MERCHANT_ID to run it
+against a store your key owns (create one with merchant_onboarding.py).
 
 Usage:
     export INSUMER_API_KEY="insr_live_YOUR_KEY_HERE"
-    export INSUMER_MERCHANT_ID="your-merchant-id"
+    export INSUMER_MERCHANT_ID="your-merchant-id"   # optional
     python acp_flow.py
 """
 
@@ -34,11 +35,8 @@ if not API_KEY:
     print("Get a free key: https://insumermodel.com/developers/#pricing")
     sys.exit(1)
 
-MERCHANT_ID = os.environ.get("INSUMER_MERCHANT_ID", "")
-if not MERCHANT_ID:
-    print("Set INSUMER_MERCHANT_ID to a store your API key owns")
-    print("(create one with merchant_onboarding.py).")
-    sys.exit(1)
+# demo-coffee-shop is InsumerAPI's demo store; set INSUMER_MERCHANT_ID for your own.
+MERCHANT_ID = os.environ.get("INSUMER_MERCHANT_ID", "demo-coffee-shop")
 print(f"Merchant: {MERCHANT_ID}\n")
 
 
