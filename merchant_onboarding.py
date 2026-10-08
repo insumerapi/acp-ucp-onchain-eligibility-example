@@ -154,7 +154,7 @@ result = requests.put(
             },
             {
                 "name": "XRPL NFT Collection",
-                "contractAddress": "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh",
+                "contractAddress": "rUDRQfn1hr84kVqQ42BoLgBsLtRgMWD4k5",
                 "chainId": "xrpl",
                 "discount": 5,
             },
