@@ -205,6 +205,23 @@ const result = await verifyAttestation(response, {
 console.log(result.valid); // true
 ```
 
+## Other ways to reach the same API
+
+**Hosted MCP.** Connect by URL to `https://api.insumermodel.com/mcp` (MCP streamable HTTP) from ChatGPT, claude.ai or any hosted agent; no install, no key, ten tools on a shared daily allowance. The ones that match this repo's flows:
+
+| Hosted tool | Flow in this repo |
+|-------------|-------------------|
+| `insumer_check_discount` | the eligibility check in `full_agent_flow.py` (`GET /v1/discount/check`) |
+| `insumer_validate_code` | `validate_code.py` (`GET /v1/codes/{code}`) |
+| `insumer_attest` | `attest_flow.py` (`POST /v1/attest`) |
+| `insumer_wallet_trust`, `insumer_batch_wallet_trust` | `trust_flow.py`, single wallet and batch (`POST /v1/trust`, `/v1/trust/batch`) |
+| `insumer_compliance_templates` | `compliance_gating.py` (`GET /v1/compliance/templates`) |
+| `insumer_list_merchants`, `insumer_get_merchant` | merchant discovery in `full_agent_flow.py` (`GET /v1/merchants`) |
+
+ACP and UCP discount issuance (`acp_flow.py`, `ucp_flow.py`) and merchant setup (`merchant_onboarding.py`) are not on the hosted endpoint. For all 27 tools on your own key: `npx -y mcp-server-insumer`.
+
+**x402 pay-per-call.** The endpoints behind `attest_flow.py` and `trust_flow.py` (`POST /v1/attest`, `/v1/trust`, `/v1/trust/batch`) also accept x402 with no key: call with no credential headers, get `402 Payment Required` with a quote (x402Version 2), pay in USDC on Base, Polygon, Arbitrum, Solana or Arc, and retry with the `PAYMENT-SIGNATURE` header. $0.05 per attest call, $0.15 per wallet for trust; the quote carries the exact amount. The payer is charged only for a successful answer, and the payer sees the answer only after the payment settled. The discount endpoints (`/v1/acp/discount`, `/v1/ucp/discount`, `/v1/verify`) take an API key, not x402.
+
 ## Links
 
 - [API Documentation](https://insumermodel.com/developers/)
