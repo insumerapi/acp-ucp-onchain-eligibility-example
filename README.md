@@ -1,4 +1,4 @@
-# InsumerAPI — On-Chain Verification Examples
+# InsumerAPI: On-Chain Verification Examples
 
 Minimal, copy-paste-ready examples for integrating on-chain verification into AI agent commerce flows using [InsumerAPI](https://insumermodel.com/developers/).
 
@@ -21,8 +21,8 @@ Minimal, copy-paste-ready examples for integrating on-chain verification into AI
 | File | Description |
 |------|-------------|
 | `attest_flow.py` | Boolean attestation: 4 of the 10 condition types, plus Merkle storage proofs |
-| `trust_flow.py` | Wallet trust profiles — single + batch (up to 10 wallets) |
-| `compliance_gating.py` | EAS attestation templates — Coinbase KYC, Gitcoin Passport, Farcaster ID |
+| `trust_flow.py` | Wallet trust profiles: single + batch (up to 10 wallets) |
+| `compliance_gating.py` | EAS attestation templates: Coinbase KYC, Gitcoin Passport, Farcaster ID |
 
 ### Autonomous Agent Operations
 
@@ -152,24 +152,24 @@ Agent                    InsumerAPI                  Blockchain
 | `POST /v1/trust/batch` | API key | 3/wallet | `trust_flow.py` |
 | `GET /v1/compliance/templates` | Public | Free | `compliance_gating.py` |
 | `GET /v1/credits` | API key | Free | `credits_flow.py` |
-| `POST /v1/credits/buy` | API key | — | `credits_flow.py` |
+| `POST /v1/credits/buy` | API key | none | `credits_flow.py` |
 | `POST /v1/acp/discount` | API key | 1 from the store owner's key (0% free) | `acp_flow.py` |
 | `POST /v1/ucp/discount` | API key | 1 from the store owner's key (0% free) | `ucp_flow.py` |
 | `GET /v1/codes/{code}` | Public | Free | `validate_code.py` |
 | `GET /v1/merchants` | None | Free | `full_agent_flow.py` |
 | `GET /v1/merchants/{id}` | None | Free | `full_agent_flow.py` |
 | `GET /v1/discount/check` | None | Free | `full_agent_flow.py` |
-| `POST /v1/merchants` | API key | — | `merchant_onboarding.py` |
-| `PUT /v1/merchants/{id}/tokens` | API key | — | `merchant_onboarding.py` |
-| `PUT /v1/merchants/{id}/nfts` | API key | — | `merchant_onboarding.py` |
-| `PUT /v1/merchants/{id}/settings` | API key | — | `merchant_onboarding.py` |
-| `POST /v1/merchants/{id}/directory` | API key | — | `merchant_onboarding.py` |
-| `GET /v1/merchants/{id}/status` | API key | — | `merchant_onboarding.py` |
+| `POST /v1/merchants` | API key | none | `merchant_onboarding.py` |
+| `PUT /v1/merchants/{id}/tokens` | API key | none | `merchant_onboarding.py` |
+| `PUT /v1/merchants/{id}/nfts` | API key | none | `merchant_onboarding.py` |
+| `PUT /v1/merchants/{id}/settings` | API key | none | `merchant_onboarding.py` |
+| `POST /v1/merchants/{id}/directory` | API key | none | `merchant_onboarding.py` |
+| `GET /v1/merchants/{id}/status` | API key | none | `merchant_onboarding.py` |
 | `POST /v1/merchants/{id}/credits` | API key | Adds credits to the owner key (compatibility) | `credits_flow.py` |
 
 ## Handling `rpc_failure` Errors
 
-If the API cannot reach an upstream data source after retries, it returns HTTP 503 with `error.code: "rpc_failure"`. No attestation is signed, no credits are charged. This is a retryable error — wait 2-5 seconds and retry.
+If the API cannot reach an upstream data source after retries, it returns HTTP 503 with `error.code: "rpc_failure"`. No attestation is signed, no credits are charged. This is a retryable error: wait 2-5 seconds and retry.
 
 **Important:** `rpc_failure` is NOT a verification failure. Do not treat it as `pass: false`. It means the data source was temporarily unavailable and the API refused to sign an unverified result.
 
@@ -178,7 +178,7 @@ resp = requests.post(f"{BASE_URL}/v1/attest", headers=HEADERS, json=payload)
 result = resp.json()
 
 if resp.status_code == 503 and result.get("error", {}).get("code") == "rpc_failure":
-    # Retryable — data source temporarily unavailable
+    # Retryable: data source temporarily unavailable
     print("Failed sources:", result["error"]["failedConditions"])
     # Wait 2-5s and retry
 ```
@@ -197,7 +197,7 @@ npm install insumer-verify @noble/post-quantum
 import { verifyAttestation } from "insumer-verify";
 
 // Pass the full API response envelope {ok, data: {attestation, sig, kid, pqSig, pqKid}, meta}
-// Do NOT pass response.data — the function expects the outer envelope
+// Do NOT pass response.data: the function expects the outer envelope
 const response = await res.json();
 const result = await verifyAttestation(response, {
   jwksUrl: "https://insumermodel.com/.well-known/jwks.json"
