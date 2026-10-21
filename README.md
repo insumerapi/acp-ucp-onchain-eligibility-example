@@ -29,7 +29,7 @@ Minimal, copy-paste-ready examples for integrating on-chain verification into AI
 | File | Description |
 |------|-------------|
 | `merchant_onboarding.py` | Full self-serve pipeline: create → configure → publish (zero human input) |
-| `credits_flow.py` | Credit management: check balance, buy credits on-chain with USDC, USDT or BTC |
+| `credits_flow.py` | Credit management: check balance, buy credits on-chain with USDC, signed by the paying wallet |
 
 ## Quick start
 

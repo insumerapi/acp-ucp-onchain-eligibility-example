@@ -3,7 +3,8 @@ Credit Management — Check Balance and Buy Credits On-Chain
 
 Agents can autonomously manage their API credits:
   - Check current balance and tier
-  - Buy verification credits with USDC, USDT or BTC (minimum $5).
+  - Buy verification credits with USDC (minimum $5), signed by the wallet
+    that paid.
     Volume rates: $5-99 = 25 credits per $1, $100-499 = 33 per $1,
     $500+ = 50 per $1
 
@@ -12,21 +13,19 @@ your key owns. A code that carries a discount costs 1 credit from the key
 that owns the store (a 0% result is free); a caller using another key is
 not charged. A store has no balance of its own.
 
-Accepted payments (the token is detected from the transaction):
-  USDC or USDT on Ethereum (1), Base (8453), Polygon (137), Arbitrum (42161),
+Accepted payments (USDC only):
+  USDC on Ethereum (1), Base (8453), Polygon (137), Arbitrum (42161),
   Optimism (10), BNB Chain (56), Avalanche (43114) and Solana ("solana")
-  USDT (TRC-20) on Tron ("tron")
-  BTC on Bitcoin ("bitcoin"), credited at the transfer's USD value
 
-Platform wallets (the address depends on the token):
-  USDC on Ethereum, Base, Polygon, Arbitrum, Optimism or Avalanche:
-           0xee432065474D2C852700f74e3fD81e2Bcc16a3D4
-  USDT on any EVM chain, and USDC or USDT on BNB Chain:
-           0xAd982CB19aCCa2923Df8F687C0614a7700255a23
-  USDC on Solana: 8fyEGM5tRjMocKQWaVXyM2XvvnTxR3sWdrYtug2zeLX4
-  USDT on Solana: 6a1mLjefhvSJX1sEX8PTnionbE9DqoYjU6F6bNkT4Ydr
-  Tron:    TC5yvwkAMakkXtUxYiu2Yn1xbBcwYuD6cn
-  Bitcoin: bc1qg7qnerdhlmdn899zemtez5tcx2a2snc0dt9dt0
+A first purchase on a key, or one that changes its registered wallet, also
+carries senderSignature: the paying wallet's signature over a short text
+naming the payment. A call without it returns the exact text to sign.
+
+Platform wallets (USDC):
+  Ethereum, Base, Polygon, Arbitrum, Optimism or Avalanche:
+             0xee432065474D2C852700f74e3fD81e2Bcc16a3D4
+  BNB Chain: 0xAd982CB19aCCa2923Df8F687C0614a7700255a23
+  Solana:    8fyEGM5tRjMocKQWaVXyM2XvvnTxR3sWdrYtug2zeLX4
 
 Usage:
     export INSUMER_API_KEY="insr_live_YOUR_KEY_HERE"
@@ -74,14 +73,16 @@ else:
 
 # ── Step 2: Buy verification credits on-chain ───────────────────
 
-print("\n=== Step 2: Buy Verification Credits (USDC, USDT or BTC) ===\n")
-print("To buy credits, send USDC, USDT or BTC to the platform wallet and submit the tx hash.\n")
+print("\n=== Step 2: Buy Verification Credits (USDC) ===\n")
+print("To buy credits, send USDC to the platform wallet and submit the tx hash.\n")
 
 # This example shows the API call structure.
 # In production, your agent would:
-#   1. Send USDC, USDT or BTC on-chain to the platform wallet
+#   1. Send USDC on-chain to the platform wallet
 #   2. Get the transaction hash
-#   3. Submit it here for credit top-up
+#   3. Submit it here for credit top-up. On a first purchase or a wallet
+#      change, the API answers 400 with a text to sign: sign it with the
+#      paying wallet and resubmit with senderSignature.
 
 EXAMPLE_TX = "0x0000000000000000000000000000000000000000000000000000000000000000"
 
@@ -90,30 +91,27 @@ print(f"  POST {BASE_URL}/v1/credits/buy")
 print(f"  Body: {{")
 print(f'    "txHash": "{EXAMPLE_TX}",')
 print(f'    "chainId": 8453,   // Base')
-print(f'    "amount": 5         // 5 USDC or USDT = 125 credits')
+print(f'    "amount": 5,        // 5 USDC = 125 credits')
+print(f'    "senderSignature": "0x..."  // first purchase or wallet change only')
 print(f"  }}")
 
-print("\n  Platform wallets (the address depends on the token):")
-print("    USDC on Ethereum, Base, Polygon, Arbitrum, Optimism or Avalanche: 0xee432065474D2C852700f74e3fD81e2Bcc16a3D4")
-print("    USDT on any EVM chain, and USDC or USDT on BNB Chain: 0xAd982CB19aCCa2923Df8F687C0614a7700255a23")
-print("    USDC on Solana: 8fyEGM5tRjMocKQWaVXyM2XvvnTxR3sWdrYtug2zeLX4")
-print("    USDT on Solana: 6a1mLjefhvSJX1sEX8PTnionbE9DqoYjU6F6bNkT4Ydr")
-print("    Tron:    TC5yvwkAMakkXtUxYiu2Yn1xbBcwYuD6cn")
-print("    Bitcoin: bc1qg7qnerdhlmdn899zemtez5tcx2a2snc0dt9dt0")
+print("\n  Platform wallets (USDC):")
+print("    Ethereum, Base, Polygon, Arbitrum, Optimism or Avalanche: 0xee432065474D2C852700f74e3fD81e2Bcc16a3D4")
+print("    BNB Chain: 0xAd982CB19aCCa2923Df8F687C0614a7700255a23")
+print("    Solana:    8fyEGM5tRjMocKQWaVXyM2XvvnTxR3sWdrYtug2zeLX4")
 
 print("\n  Supported chains:")
 chains = [
-    ("Ethereum", 1, "USDC or USDT"), ("Base", 8453, "USDC or USDT"),
-    ("Polygon", 137, "USDC or USDT"), ("Arbitrum", 42161, "USDC or USDT"),
-    ("Optimism", 10, "USDC or USDT"), ("BNB Chain", 56, "USDC or USDT"),
-    ("Avalanche", 43114, "USDC or USDT"), ("Solana", "solana", "USDC or USDT"),
-    ("Tron", "tron", "USDT (TRC-20)"), ("Bitcoin", "bitcoin", "BTC"),
+    ("Ethereum", 1, "USDC"), ("Base", 8453, "USDC"),
+    ("Polygon", 137, "USDC"), ("Arbitrum", 42161, "USDC"),
+    ("Optimism", 10, "USDC"), ("BNB Chain", 56, "USDC"),
+    ("Avalanche", 43114, "USDC"), ("Solana", "solana", "USDC"),
 ]
 for name, chain_id, tokens in chains:
     print(f"    {name} (chainId: {chain_id}): {tokens}")
 
 print("\n  Rates: $5-99 = 25 credits per $1 | $100-499 = 33 per $1 | $500+ = 50 per $1")
-print("  Minimum: $5 (125 credits). BTC is credited at the transfer's USD value.")
+print("  Minimum: $5 (125 credits). USDC only; other tokens and chains are refused.")
 
 
 # ── Step 3: Top up through a store you own (compatibility) ──────
@@ -130,7 +128,7 @@ print(f"  POST {BASE_URL}/v1/merchants/{MERCHANT_ID}/credits")
 print(f"  Body: {{")
 print(f'    "txHash": "0x...",')
 print(f'    "chainId": 8453,')
-print(f'    "amount": 10        // 10 USDC or USDT = 250 credits on the owner key (flat 25 per $1)')
+print(f'    "amount": 10        // 10 USDC = 250 credits on the owner key (flat 25 per $1)')
 print(f"  }}")
 print("\n  Use POST /v1/credits/buy instead: same balance, with the volume rates.")
 
@@ -140,7 +138,7 @@ print("\n  Use POST /v1/credits/buy instead: same balance, with the volume rates
 print("\n\n=== Full Autonomous Credit Management Flow ===\n")
 print("An agent can maintain its own credit balance without human intervention:\n")
 print("  1. GET  /v1/credits           — check remaining credits")
-print("  2. If low, send USDC, USDT or BTC on-chain — agent initiates transfer")
+print("  2. If low, send USDC on-chain: the agent initiates the transfer")
 print("  3. POST /v1/credits/buy       — submit tx hash, receive credits")
 print("  4. Continue making API calls   — attestations, trust profiles, discounts")
 print("\nThe same balance pays for discount codes at the stores your key owns.")
